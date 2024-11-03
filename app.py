@@ -6,22 +6,17 @@ import os
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
-app.config['JSON_AS_ASCII'] = False  # Enable proper Unicode handling in JSON
 
 # Ensure the upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 def extract_text_from_pdf(pdf_path):
     with fitz.open(pdf_path) as pdf:
-        pages = []
+        text = ""
         for page_num, page in enumerate(pdf, start=1):
-            # Get text with proper encoding
-            page_text = page.get_text("text")  # Using "text" format for better Unicode handling
-            pages.append({
-                "page_number": page_num,
-                "content": page_text
-            })
-        return pages
+            page_text = page.get_text()
+            text += f"\nPage {page_num}:\n{page_text}"
+        return text
 
 def extract_images_from_pdf(pdf_path):
     images = []
@@ -46,11 +41,10 @@ def extract_images_from_pdf(pdf_path):
 def upload_file():
     if request.method == "POST":
         if 'pdf_file' not in request.files:
-            return jsonify({"error": "No file part in the request"}), 400
-        
+            return "No file part in the request"
         file = request.files['pdf_file']
         if file.filename == '':
-            return jsonify({"error": "No file selected"}), 400
+            return "No file selected"
         
         if file:
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
@@ -60,18 +54,7 @@ def upload_file():
             text_data = extract_text_from_pdf(file_path)
             image_data = extract_images_from_pdf(file_path)
 
-            # Create JSON response
-            response_data = {
-                "filename": file.filename,
-                "pages": text_data,
-                "images": image_data
-            }
-
-            # Check if the client wants JSON or HTML
-            if request.headers.get('Accept') == 'application/json':
-                return jsonify(response_data)
-            else:
-                return render_template("result.html", data=response_data)
+            return render_template("result.html", text_data=text_data, image_data=image_data)
 
     return render_template("upload.html")
 
