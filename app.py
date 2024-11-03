@@ -6,16 +6,17 @@ import os
 
 app = Flask(__name__)
 app.config['UPLOAD_FOLDER'] = 'uploads'
+app.config['JSON_AS_ASCII'] = False  # Enable proper Unicode handling in JSON
 
 # Ensure the upload folder exists
 os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 
 def extract_text_from_pdf(pdf_path):
     with fitz.open(pdf_path) as pdf:
-        text = ""
         pages = []
         for page_num, page in enumerate(pdf, start=1):
-            page_text = page.get_text()
+            # Get text with proper encoding
+            page_text = page.get_text("text")  # Using "text" format for better Unicode handling
             pages.append({
                 "page_number": page_num,
                 "content": page_text
