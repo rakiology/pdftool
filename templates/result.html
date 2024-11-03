@@ -1,18 +1,74 @@
-<!doctype html>
-<html lang="en">
+<!DOCTYPE html>
+<html>
 <head>
-    <title>Extracted PDF Data</title>
+    <title>PDF Extraction Results</title>
+    <style>
+        pre {
+            background-color: #f5f5f5;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+        .json-content {
+            font-family: monospace;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            margin: 10px 0;
+        }
+        .controls {
+            margin: 20px 0;
+        }
+    </style>
 </head>
 <body>
-    <h1>Extracted Text</h1>
-    <pre>{{ text_data }}</pre>
+    <h1>PDF Extraction Results</h1>
+    
+    <div class="controls">
+        <button onclick="toggleView()">Toggle Raw/Formatted View</button>
+        <a href="/" class="button">Upload Another PDF</a>
+    </div>
 
-    <h1>Extracted Images</h1>
-    {% for image in image_data %}
-        <h3>Page {{ image.page }}, Image {{ image.image_index }}</h3>
-        <img src="{{ image.image_url }}" alt="Extracted Image">
-    {% endfor %}
+    <!-- Raw JSON View -->
+    <pre id="rawJson" class="json-content" style="display: none;">
+{{ data | tojson(indent=2) }}
+    </pre>
 
-    <a href="/">Upload Another PDF</a>
+    <!-- Formatted View -->
+    <div id="formattedView">
+        <h2>File: {{ data.filename }}</h2>
+
+        <h3>Text Content:</h3>
+        {% for page in data.pages %}
+        <div class="page">
+            <h4>Page {{ page.page_number }}</h4>
+            <pre>{{ page.content }}</pre>
+        </div>
+        {% endfor %}
+
+        <h3>Images:</h3>
+        {% for image in data.images %}
+        <div class="image">
+            <h4>Page {{ image.page }}, Image {{ image.image_index }}</h4>
+            <img src="{{ image.image_url }}" alt="Extracted Image">
+        </div>
+        {% endfor %}
+    </div>
+
+    <script>
+        function toggleView() {
+            const rawView = document.getElementById('rawJson');
+            const formattedView = document.getElementById('formattedView');
+            
+            if (rawView.style.display === 'none') {
+                rawView.style.display = 'block';
+                formattedView.style.display = 'none';
+            } else {
+                rawView.style.display = 'none';
+                formattedView.style.display = 'block';
+            }
+        }
+    </script>
 </body>
 </html>
