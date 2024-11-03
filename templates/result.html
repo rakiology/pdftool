@@ -1,113 +1,18 @@
-<!DOCTYPE html>
-<html>
+<!doctype html>
+<html lang="en">
 <head>
-    <title>PDF Extraction Results</title>
-    <meta charset="UTF-8">
-    <!-- Add Bengali font support -->
-    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+Bengali:wght@400;700&display=swap" rel="stylesheet">
-    <style>
-        body {
-            font-family: 'Noto Sans Bengali', sans-serif;
-            line-height: 1.6;
-            margin: 20px;
-            padding: 0;
-        }
-        pre {
-            background-color: #f5f5f5;
-            padding: 15px;
-            border-radius: 5px;
-            overflow-x: auto;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-        .json-content {
-            font-family: monospace;
-        }
-        .bengali-text {
-            font-family: 'Noto Sans Bengali', sans-serif;
-        }
-        img {
-            max-width: 100%;
-            height: auto;
-            margin: 10px 0;
-        }
-        .controls {
-            margin: 20px 0;
-        }
-        .button {
-            display: inline-block;
-            padding: 8px 16px;
-            margin: 0 10px;
-            background-color: #4CAF50;
-            color: white;
-            text-decoration: none;
-            border-radius: 4px;
-            border: none;
-            cursor: pointer;
-        }
-        .button:hover {
-            background-color: #45a049;
-        }
-        .page {
-            margin-bottom: 30px;
-            padding: 15px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .page pre {
-            font-family: 'Noto Sans Bengali', monospace;
-            white-space: pre-wrap;
-            word-wrap: break-word;
-        }
-    </style>
+    <title>Extracted PDF Data</title>
 </head>
 <body>
-    <h1>PDF Extraction Results</h1>
-    
-    <div class="controls">
-        <button onclick="toggleView()" class="button">Toggle Raw/Formatted View</button>
-        <a href="/" class="button">Upload Another PDF</a>
-    </div>
+    <h1>Extracted Text</h1>
+    <pre>{{ text_data }}</pre>
 
-    <!-- Raw JSON View -->
-    <pre id="rawJson" class="json-content" style="display: none;">
-{{ data | tojson(indent=2, ensure_ascii=False) }}
-    </pre>
+    <h1>Extracted Images</h1>
+    {% for image in image_data %}
+        <h3>Page {{ image.page }}, Image {{ image.image_index }}</h3>
+        <img src="{{ image.image_url }}" alt="Extracted Image">
+    {% endfor %}
 
-    <!-- Formatted View -->
-    <div id="formattedView">
-        <h2>File: {{ data.filename }}</h2>
-
-        <h3>Text Content:</h3>
-        {% for page in data.pages %}
-        <div class="page">
-            <h4>Page {{ page.page_number }}</h4>
-            <pre class="bengali-text">{{ page.content }}</pre>
-        </div>
-        {% endfor %}
-
-        <h3>Images:</h3>
-        {% for image in data.images %}
-        <div class="image">
-            <h4>Page {{ image.page }}, Image {{ image.image_index }}</h4>
-            <img src="{{ image.image_url }}" alt="Extracted Image">
-        </div>
-        {% endfor %}
-    </div>
-
-    <script>
-        function toggleView() {
-            const rawView = document.getElementById('rawJson');
-            const formattedView = document.getElementById('formattedView');
-            
-            if (rawView.style.display === 'none') {
-                rawView.style.display = 'block';
-                formattedView.style.display = 'none';
-            } else {
-                rawView.style.display = 'none';
-                formattedView.style.display = 'block';
-            }
-        }
-    </script>
+    <a href="/">Upload Another PDF</a>
 </body>
 </html>
