@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <title>Extracted PDF Data</title>
+</head>
+<body>
+    <h1>Extracted Text</h1>
+    <pre>{{ text_data }}</pre>
+
+    <h1>Extracted Images</h1>
+    {% for image in image_data %}
+        <h3>Page {{ image.page }}, Image {{ image.image_index }}</h3>
+        <img src="{{ image.image_url }}" alt="Extracted Image">
+    {% endfor %}
+
+    <a href="/">Upload Another PDF</a>
+</body>
+</html>
