@@ -13,10 +13,14 @@ os.makedirs(app.config['UPLOAD_FOLDER'], exist_ok=True)
 def extract_text_from_pdf(pdf_path):
     with fitz.open(pdf_path) as pdf:
         text = ""
+        pages = []
         for page_num, page in enumerate(pdf, start=1):
             page_text = page.get_text()
-            text += f"\nPage {page_num}:\n{page_text}"
-        return text
+            pages.append({
+                "page_number": page_num,
+                "content": page_text
+            })
+        return pages
 
 def extract_images_from_pdf(pdf_path):
     images = []
@@ -41,10 +45,11 @@ def extract_images_from_pdf(pdf_path):
 def upload_file():
     if request.method == "POST":
         if 'pdf_file' not in request.files:
-            return "No file part in the request"
+            return jsonify({"error": "No file part in the request"}), 400
+        
         file = request.files['pdf_file']
         if file.filename == '':
-            return "No file selected"
+            return jsonify({"error": "No file selected"}), 400
         
         if file:
             file_path = os.path.join(app.config['UPLOAD_FOLDER'], file.filename)
@@ -54,7 +59,18 @@ def upload_file():
             text_data = extract_text_from_pdf(file_path)
             image_data = extract_images_from_pdf(file_path)
 
-            return render_template("result.html", text_data=text_data, image_data=image_data)
+            # Create JSON response
+            response_data = {
+                "filename": file.filename,
+                "pages": text_data,
+                "images": image_data
+            }
+
+            # Check if the client wants JSON or HTML
+            if request.headers.get('Accept') == 'application/json':
+                return jsonify(response_data)
+            else:
+                return render_template("result.html", data=response_data)
 
     return render_template("upload.html")
 
